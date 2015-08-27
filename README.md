@@ -25,6 +25,11 @@ Or install it yourself as:
 ### Simple encryption
 
 ```
+password = "this is a super-secret password"
+message = "Elvis lives!"
+
+encrypted_message = Safebox.encrypt(password, message)
+decrypted_message = Safebox.decrypt(password, encrypted_message)
 ```
 
 ### Using econfig
