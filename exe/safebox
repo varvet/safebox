@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require "safebox/cli"
+require "optparse"
+
+# safebox list
+# safebox set key1=value1 key2=value2
+# safebox delete key1 key2
+
+options = {}
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: safebox [options] [command]"
+
+  opts.on("-f", "--file [SAFEBOX]", "Safebox file (safe.box)") do |file|
+    options[:file] = file
+  end
+
+  opts.separator ""
+  opts.separator "Common options:"
+
+  opts.on_tail("-h", "--help", "Show help text") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("-v", "--version", "Show version of safebox gem") do
+    puts Safebox::VERSION
+    exit
+  end
+end
+
+command, *args = option_parser.parse!(ARGV)
+
+unless Safebox::CLI.new(options).run(command, args)
+  puts option_parser
+  exit
+end
