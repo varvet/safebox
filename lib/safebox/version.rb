@@ -1,0 +1,3 @@
+module Safebox
+  VERSION = "0.1.0"
+end
