@@ -24,7 +24,7 @@ Or install it yourself as:
 
 ### Simple encryption
 
-```
+``` ruby
 password = "this is a super-secret password"
 message = "Elvis lives!"
 
