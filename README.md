@@ -25,6 +25,8 @@ Or install it yourself as:
 ### Simple encryption
 
 ``` ruby
+require "safebox"
+
 password = "this is a super-secret password"
 message = "Elvis lives!"
 
