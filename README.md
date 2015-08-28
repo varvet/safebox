@@ -36,6 +36,15 @@ decrypted_message = Safebox.decrypt(password, encrypted_message)
 
 ### Using econfig
 
+First, add safebox to your Gemfile:
+
+``` ruby
+gem "econfig", require: "econfig/rails"
+gem "safebox", require: "safebox/econfig"
+```
+
+Safebox will automatically configure econfig for you.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run
