@@ -1,18 +1,40 @@
 require "safebox"
 require "json"
 require "io/console"
+require "optparse"
 
 module Safebox
   class CLI
-    def initialize(options)
-      @options = options
+    def initialize(defaults = {})
+      @options = defaults
+
+      indent = " " * 4
+      @parser = OptionParser.new do |opts|
+        opts.banner = "Usage: safebox [options] [command]"
+        opts.version = Safebox::VERSION
+
+        opts.separator ""
+        opts.separator "Commands:"
+
+        width = 33
+        opts.separator indent + "list".ljust(width) + "Lists all keys and their values"
+        opts.separator indent + "get KEY".ljust(width) + "Gets the given key"
+        opts.separator indent + "set KEY=VALUE [KEY=VALUE...]".ljust(width) + "Set value of given keys"
+        opts.separator indent + "delete KEY".ljust(width) + "Delete the given key"
+
+        opts.separator ""
+        opts.separator "Common options:"
+        opts.separator indent + "-h, --help"
+        opts.separator indent + "-v, --version"
+        opts.on("-f", "--file [SAFEBOX]", "Safebox file (safe.box)") do |file|
+          @options[:file] = file
+        end
+      end
     end
 
-    def file
-      @options[:file] or "./safe.box"
-    end
+    def run(argv)
+      command, *args = @parser.parse!(argv)
 
-    def run(command, args)
       if command and respond_to?(command)
         public_send(command, *args)
         true
@@ -39,7 +61,15 @@ module Safebox
       write_contents(new_contents)
     end
 
+    def to_s
+      @parser.to_s
+    end
+
     private
+
+    def file
+      @options[:file] or "./safe.box"
+    end
 
     def password
       @password ||= begin
