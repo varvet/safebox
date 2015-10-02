@@ -48,7 +48,10 @@ describe Safebox::CLI do
     end
 
     describe "get" do
-      it "fails with a warning and exit status 1 if key does not exist"
+      it "fails with a warning and exit status 1 if key does not exist" do
+        expect(Kernel).to receive(:abort).with("no such key: password")
+        cli.run("get", "password")
+      end
 
       it "prints the value of the given key" do
         cli.run("set", "password=hunter2")
@@ -66,6 +69,8 @@ describe Safebox::CLI do
       end
 
       it "will not create the safe.box if it does not exist", tempfile: :directory do
+        expect(Kernel).to receive(:abort).with(any_args)
+
         expect {
           cli.run("get", "password")
         }.not_to change { File.exist?("safe.box") }.from(false)

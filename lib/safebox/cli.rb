@@ -58,6 +58,8 @@ module Safebox
       if contents.has_key?(key)
         $stdout.print contents[key]
         $stdout.puts if $stdout.tty?
+      else
+        Kernel.abort "no such key: #{key}"
       end
     end
 
