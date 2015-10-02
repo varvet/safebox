@@ -63,10 +63,9 @@ module Safebox
 
     def delete(*args)
       contents = read_contents
-
-      new_contents = contents.slice(contents.keys - args)
-
-      write_contents(new_contents)
+      before_hash = contents.hash
+      args.each { |key| contents.delete(key) }
+      write_contents(contents) unless contents.hash == before_hash
     end
 
     def to_s

@@ -115,7 +115,7 @@ describe Safebox::CLI do
       end
     end
 
-    describe "delete", pending: true do
+    describe "delete" do
       it "deletes a key from the safebox" do
         cli.run("set", "username=Arne")
 
