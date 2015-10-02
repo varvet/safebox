@@ -131,10 +131,6 @@ describe Safebox::CLI do
         expect { cli.run("list") }.not_to output(/password/).to_stdout
       end
 
-      it "prints a warning if the key does not exist", pending: true do
-        expect { cli.run("delete", "username") }.to output(/key 'username' does not exist/).to_stderr
-      end
-
       it "will not create the safe.box if it does not exist", tempfile: :directory do
         expect {
           cli.run("delete", "password")
