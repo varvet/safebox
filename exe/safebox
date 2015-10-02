@@ -2,10 +2,6 @@
 
 require "safebox/cli"
 
-# safebox list
-# safebox set key1=value1 key2=value2
-# safebox delete key1 key2
-
 cli = Safebox::CLI.new()
 
 unless cli.run(ARGV)
