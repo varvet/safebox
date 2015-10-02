@@ -7,6 +7,12 @@ module Safebox
   class CLI
     def initialize(defaults = {})
       @options = defaults
+      @commands = {
+        list:   [nil, "Lists all keys and their values"],
+        get:    ["KEY", "Prints the given key to STDOUT"],
+        set:    ["KEY=VALUE [KEY=VALUE...]", "Sets the value of the given keys"],
+        delete: ["KEY [KEY...]", "Delete the given keys"],
+      }
 
       indent = " " * 4
       @parser = OptionParser.new do |opts|
@@ -17,10 +23,10 @@ module Safebox
         opts.separator "Commands:"
 
         width = 33
-        opts.separator indent + "list".ljust(width) + "Lists all keys and their values"
-        opts.separator indent + "get KEY".ljust(width) + "Gets the given key"
-        opts.separator indent + "set KEY=VALUE [KEY=VALUE...]".ljust(width) + "Set value of given keys"
-        opts.separator indent + "delete KEY".ljust(width) + "Delete the given key"
+        @commands.each do |command, (arguments, description)|
+          command = "#{command} #{arguments}"
+          opts.separator indent + command.ljust(width) + description
+        end
 
         opts.separator ""
         opts.separator "Common options:"
@@ -35,7 +41,7 @@ module Safebox
     def run(*argv)
       command, *args = @parser.parse!(argv)
 
-      if command and respond_to?(command)
+      if command and @commands.include?(command.to_sym)
         public_send(command, *args)
         true
       end
