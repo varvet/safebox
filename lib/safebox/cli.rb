@@ -47,6 +47,13 @@ module Safebox
       end
     end
 
+    def get(key)
+      contents = read_contents
+      if contents.has_key?(key)
+        $stdout.print contents[key]
+      end
+    end
+
     def set(*args)
       updates = args.map { |arg| arg.split("=", 2) }.to_h
       new_contents = read_contents.merge(updates)

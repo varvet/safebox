@@ -50,7 +50,7 @@ describe Safebox::CLI do
     describe "get" do
       it "fails with a warning and exit status 1 if key does not exist"
 
-      it "prints the value of the given key", pending: true do
+      it "prints the value of the given key" do
         cli.run("set", "password=hunter2")
 
         expect { cli.run("get", "password") }.to output("hunter2").to_stdout
