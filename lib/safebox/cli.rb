@@ -32,7 +32,7 @@ module Safebox
       end
     end
 
-    def run(argv)
+    def run(*argv)
       command, *args = @parser.parse!(argv)
 
       if command and respond_to?(command)
@@ -65,14 +65,14 @@ module Safebox
       @parser.to_s
     end
 
-    private
-
     def file
       @options[:file] or "./safe.box"
     end
 
+    private
+
     def password
-      @password ||= begin
+      @options[:password] ||= begin
         $stderr.print "Password: "
         password = $stdin.noecho(&:gets).chomp
         $stderr.puts ""

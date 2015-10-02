@@ -4,7 +4,7 @@ require "safebox/cli"
 
 cli = Safebox::CLI.new()
 
-unless cli.run(ARGV)
+unless cli.run(*ARGV)
   puts cli
   exit
 end
