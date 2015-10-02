@@ -51,6 +51,7 @@ module Safebox
       contents = read_contents
       if contents.has_key?(key)
         $stdout.print contents[key]
+        $stdout.puts if $stdout.tty?
       end
     end
 

@@ -56,7 +56,7 @@ describe Safebox::CLI do
         expect { cli.run("get", "password") }.to output("hunter2").to_stdout
       end
 
-      it "appends a newline if stdout is a tty", pending: true do
+      it "appends a newline if stdout is a tty" do
         cli.run("set", "password=hunter2")
 
         expect {
