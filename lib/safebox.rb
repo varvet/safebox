@@ -1,4 +1,5 @@
 require "safebox/version"
+require "safebox/file"
 require "rbnacl/libsodium"
 
 module Safebox

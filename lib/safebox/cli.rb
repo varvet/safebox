@@ -48,15 +48,14 @@ module Safebox
     end
 
     def list
-      read_contents.each do |key, value|
+      file.data.each do |key, value|
         $stdout.puts "#{key}=#{value}"
       end
     end
 
     def get(key)
-      contents = read_contents
-      if contents.has_key?(key)
-        $stdout.print contents[key]
+      if file.has_key?(key)
+        $stdout.print file.get(key)
         $stdout.puts if $stdout.tty?
       else
         Kernel.abort "no such key: #{key}"
@@ -65,15 +64,11 @@ module Safebox
 
     def set(*args)
       updates = args.map { |arg| arg.split("=", 2) }.to_h
-      new_contents = read_contents.merge(updates)
-      write_contents(new_contents)
+      file.update(updates)
     end
 
     def delete(*args)
-      contents = read_contents
-      before_hash = contents.hash
-      args.each { |key| contents.delete(key) }
-      write_contents(contents) unless contents.hash == before_hash
+      file.delete(*args)
     end
 
     def to_s
@@ -81,10 +76,14 @@ module Safebox
     end
 
     def file
-      @options[:file] or "./safe.box"
+      @file ||= Safebox::File.new(path, password)
     end
 
     private
+
+    def path
+      @options[:file] or "./safe.box"
+    end
 
     def password
       @options[:password] ||= begin
@@ -92,21 +91,6 @@ module Safebox
         password = $stdin.noecho(&:gets).chomp
         $stderr.puts ""
         password
-      end
-    end
-
-    def write_contents(contents)
-      ciphertext = Safebox.encrypt(password, JSON.generate(contents))
-      File.write(file, ciphertext, encoding: Encoding::BINARY)
-    end
-
-    def read_contents
-      if File.exists?(file)
-        ciphertext = File.read(file, encoding: Encoding::BINARY)
-        decrypted = Safebox.decrypt(password, ciphertext)
-        JSON.parse(decrypted)
-      else
-        {}
       end
     end
   end
