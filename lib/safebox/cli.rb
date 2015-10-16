@@ -64,7 +64,7 @@ module Safebox
     end
 
     def set(*args)
-      updates = args.map { |arg| arg.split("=", 2) }.to_h
+      updates = Hash[args.map { |arg| arg.split("=", 2) }]
       new_contents = read_contents.merge(updates)
       write_contents(new_contents)
     end

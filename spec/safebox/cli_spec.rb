@@ -14,7 +14,7 @@ describe Safebox::CLI do
     else
       Tempfile.open(["safe", ".box"]) do |io|
         @tempfile = io.path
-        io.unlink
+        FileUtils.rm(@tempfile)
         example.run
       end
     end
