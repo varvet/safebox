@@ -7,6 +7,12 @@ module Safebox
   class CLI
     def initialize(defaults = {})
       @options = defaults
+      @commands = {
+        list:   [nil, "Lists all keys and their values"],
+        get:    ["KEY", "Prints the given key to STDOUT"],
+        set:    ["KEY=VALUE [KEY=VALUE...]", "Sets the value of the given keys"],
+        delete: ["KEY [KEY...]", "Delete the given keys"],
+      }
 
       indent = " " * 4
       @parser = OptionParser.new do |opts|
@@ -17,10 +23,10 @@ module Safebox
         opts.separator "Commands:"
 
         width = 33
-        opts.separator indent + "list".ljust(width) + "Lists all keys and their values"
-        opts.separator indent + "get KEY".ljust(width) + "Gets the given key"
-        opts.separator indent + "set KEY=VALUE [KEY=VALUE...]".ljust(width) + "Set value of given keys"
-        opts.separator indent + "delete KEY".ljust(width) + "Delete the given key"
+        @commands.each do |command, (arguments, description)|
+          command = "#{command} #{arguments}"
+          opts.separator indent + command.ljust(width) + description
+        end
 
         opts.separator ""
         opts.separator "Common options:"
@@ -32,10 +38,10 @@ module Safebox
       end
     end
 
-    def run(argv)
+    def run(*argv)
       command, *args = @parser.parse!(argv)
 
-      if command and respond_to?(command)
+      if command and @commands.include?(command.to_sym)
         public_send(command, *args)
         true
       end
@@ -47,6 +53,16 @@ module Safebox
       end
     end
 
+    def get(key)
+      contents = read_contents
+      if contents.has_key?(key)
+        $stdout.print contents[key]
+        $stdout.puts if $stdout.tty?
+      else
+        Kernel.abort "no such key: #{key}"
+      end
+    end
+
     def set(*args)
       updates = args.map { |arg| arg.split("=", 2) }.to_h
       new_contents = read_contents.merge(updates)
@@ -55,24 +71,23 @@ module Safebox
 
     def delete(*args)
       contents = read_contents
-
-      new_contents = contents.slice(contents.keys - args)
-
-      write_contents(new_contents)
+      before_hash = contents.hash
+      args.each { |key| contents.delete(key) }
+      write_contents(contents) unless contents.hash == before_hash
     end
 
     def to_s
       @parser.to_s
     end
 
-    private
-
     def file
       @options[:file] or "./safe.box"
     end
 
+    private
+
     def password
-      @password ||= begin
+      @options[:password] ||= begin
         $stderr.print "Password: "
         password = $stdin.noecho(&:gets).chomp
         $stderr.puts ""

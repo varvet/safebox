@@ -1,5 +1,3 @@
-require "spec_helper"
-
 describe Safebox do
   it "has a version number" do
     expect(Safebox::VERSION).not_to be nil

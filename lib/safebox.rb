@@ -1,5 +1,5 @@
 require "safebox/version"
-require "rbnacl"
+require "rbnacl/libsodium"
 
 module Safebox
   BOX_VERSION = 1
