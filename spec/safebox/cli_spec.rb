@@ -3,29 +3,10 @@ require "tmpdir"
 require "safebox/cli"
 
 describe Safebox::CLI do
-  around do |example|
-    case example.metadata[:tempfile]
-    when :directory
-      Dir.mktmpdir do |directory|
-        Dir.chdir(directory) { example.run }
-      end
-    when false
-      example.run
-    else
-      Tempfile.open(["safe", ".box"]) do |io|
-        @tempfile = io.path
-        FileUtils.rm(@tempfile)
-        example.run
-      end
-    end
-  end
-
   def dump(safebox)
-    ciphertext = Safebox.encrypt(password, JSON.generate(safebox))
-    File.write(cli.file, ciphertext, encoding: Encoding::BINARY)
+    safebox = Safebox::File.new(cli.file)
+    safebox.write(Safebox::Hash.new(password).update(safebox))
   end
-
-  let(:password) { "test1234" }
 
   let(:cli) do
     Safebox::CLI.new({
@@ -142,5 +123,9 @@ describe Safebox::CLI do
         }.not_to change { File.exist?("safe.box") }.from(false)
       end
     end
+  end
+
+  it "re-encrypts the safebox if it is an old version" do
+
   end
 end

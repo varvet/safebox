@@ -64,7 +64,7 @@ module Safebox
         hash[key] = value
       end
 
-      write(hash)
+      safebox.write(hash)
     end
 
     def delete(*args)
@@ -73,7 +73,7 @@ module Safebox
         did_change = true if hash.has_key?(key)
         hash.delete(key)
       end
-      write(hash) if did_change
+      safebox.write(hash) if did_change
     end
 
     def to_s
@@ -86,16 +86,14 @@ module Safebox
 
     private
 
-    def hash
-      @hash ||= begin
-        data = if File.exists?(file)
-          encoded = File.read(file, encoding: Encoding::BINARY)
-          YAML.load(encoded)
-        else
-          {}
-        end
+    def safebox
+      @safebox ||= Safebox::File.new(file)
+    end
 
-        Safebox::Hash.new(password, encrypted_hash: data)
+    def hash
+      @hash ||= safebox.read(password) do |hash, old_version|
+        $stderr.puts "Your safebox was upgraded from v#{old_version} to v#{Safebox::VERSION}."
+        safebox.write(hash)
       end
     end
 
@@ -106,11 +104,6 @@ module Safebox
         $stderr.puts ""
         password
       end
-    end
-
-    def write(hash)
-      encoded = YAML.dump(hash.encrypted_hash)
-      ::File.write(file, encoded, encoding: Encoding::BINARY)
     end
   end
 end
