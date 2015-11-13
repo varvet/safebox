@@ -95,7 +95,7 @@ module Safebox
           {}
         end
 
-        Safebox::Hash.new(password, data: data)
+        Safebox::Hash.new(password, encrypted_hash: data)
       end
     end
 
@@ -109,8 +109,8 @@ module Safebox
     end
 
     def write(hash)
-      encoded = YAML.dump(hash.data)
-      File.write(file, encoded, encoding: Encoding::BINARY)
+      encoded = YAML.dump(hash.encrypted_hash)
+      ::File.write(file, encoded, encoding: Encoding::BINARY)
     end
   end
 end
