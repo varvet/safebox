@@ -1,5 +1,5 @@
 require "safebox"
-require "json"
+require "yaml"
 require "io/console"
 require "optparse"
 
@@ -48,32 +48,32 @@ module Safebox
     end
 
     def list
-      read_contents.each do |key, value|
+      hash.each do |key, value|
         $stdout.puts "#{key}=#{value}"
       end
     end
 
     def get(key)
-      contents = read_contents
-      if contents.has_key?(key)
-        $stdout.print contents[key]
-        $stdout.puts if $stdout.tty?
-      else
-        Kernel.abort "no such key: #{key}"
-      end
+      $stdout.print hash.fetch(key) { Kernel.abort "no such key: #{key}" }
+      $stdout.puts if $stdout.tty?
     end
 
     def set(*args)
-      updates = Hash[args.map { |arg| arg.split("=", 2) }]
-      new_contents = read_contents.merge(updates)
-      write_contents(new_contents)
+      args.each do |arg|
+        key, value = arg.split("=", 2)
+        hash[key] = value
+      end
+
+      write(hash)
     end
 
     def delete(*args)
-      contents = read_contents
-      before_hash = contents.hash
-      args.each { |key| contents.delete(key) }
-      write_contents(contents) unless contents.hash == before_hash
+      did_change = false
+      args.each do |key|
+        did_change = true if hash.has_key?(key)
+        hash.delete(key)
+      end
+      write(hash) if did_change
     end
 
     def to_s
@@ -86,6 +86,19 @@ module Safebox
 
     private
 
+    def hash
+      @hash ||= begin
+        data = if File.exists?(file)
+          encoded = File.read(file, encoding: Encoding::BINARY)
+          YAML.load(encoded)
+        else
+          {}
+        end
+
+        Safebox::Hash.new(password, data: data)
+      end
+    end
+
     def password
       @options[:password] ||= begin
         $stderr.print "Password: "
@@ -95,19 +108,9 @@ module Safebox
       end
     end
 
-    def write_contents(contents)
-      ciphertext = Safebox.encrypt(password, JSON.generate(contents))
-      File.write(file, ciphertext, encoding: Encoding::BINARY)
-    end
-
-    def read_contents
-      if File.exists?(file)
-        ciphertext = File.read(file, encoding: Encoding::BINARY)
-        decrypted = Safebox.decrypt(password, ciphertext)
-        JSON.parse(decrypted)
-      else
-        {}
-      end
+    def write(hash)
+      encoded = YAML.dump(hash.data)
+      File.write(file, encoded, encoding: Encoding::BINARY)
     end
   end
 end

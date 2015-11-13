@@ -1,5 +1,6 @@
 require "safebox/version"
 require "rbnacl/libsodium"
+require "safebox/hash"
 
 module Safebox
   BOX_VERSION = 1
